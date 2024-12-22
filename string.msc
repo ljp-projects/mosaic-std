@@ -1,0 +1,17 @@
+extern fn strcmp(*i8 left, *i8 right) -> i32
+
+fn PcPceqcmp(*i8 leftp, *i8 rightp) -> i32 {
+    return strcmp(leftp, rightp) == 0
+}
+
+fn E0_cE0_ceqcmp(*i8 left, *i8 right) -> i32 {
+    return strcmp(left, right) == 0
+}
+
+fn FcFceqcmp(i32 leftc, *i8 s, i32 rightc, *i8 other) -> i32 {
+	if leftc != rightc {
+		return 0
+	}
+
+	return strcmp(s, other) == 0
+}
