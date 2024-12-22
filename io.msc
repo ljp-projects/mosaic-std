@@ -1,0 +1,28 @@
+extern fn puts(*i8 s) -> null
+extern fn printf(*i8 fmt, i32 s) -> null
+extern fn getline(**i8 l, *i32 n, *null f) -> i32
+extern fn get_stdin() -> *null
+extern fn nullptr() -> *null
+
+fn println(*i8 str) export -> null {
+	return puts(str)
+}
+
+fn readln() auto_free export -> *i8 {
+	def *null stdin -> get_stdin()
+
+	def *i8 line -> nullptr()
+	def i32 len  -> 0
+
+	printf("LEN %d", 1)
+
+	def i32 chars -> getline(&line, &len, stdin)
+
+	# if line[chars - 1] == "\n"[0] {
+    #     line[chars - 1] = "\0"[0]
+    # }
+
+    printf("LEN %d", len)
+
+    return line
+}

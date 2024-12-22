@@ -1,0 +1,60 @@
+include std::sync
+include std::alloc
+include std::thread
+
+struct Deferred<T: Sync + Send> {
+	# can be *T or *null T
+	def *T? value
+	def bool complete -> false
+
+	fn ready() context(*Self) -> bool {
+		self.complete
+	}
+
+	fn await() context(*Self) -> T {
+		if !self.ready() {
+			syncwait(5)
+			return await()
+		}
+
+		return *self.value
+	}
+
+	# this is used when this value is not used in a higher scope than the one it was called in
+	fn auto_new(
+		fn(*Self) -> T payload
+	) init auto_free -> &'caller Self {
+		def &'caller Self self -> @pcast('caller, manmalloc<'caller>(\sizeof Self\), Self)
+
+		self.value = &null
+		self.complete = false
+
+		def *Thread thr -> Thread::new()
+
+		thr.execute({ *Thread thr ->
+			payload(self)
+		})
+
+		return self
+	}
+
+	# this is used when this value is used in a higher scope than the one it was called in
+	# track_free will deallocate it at the end of a given lifetime
+	# each scope declares a new lifetime if specified
+	fn auto_new<'free>(
+		fn(*Self) -> T payload
+	) init free_at('free) -> *Self {
+		def *Self self -> @pcast(manmalloc<'free>(\sizeof Self\), *Self)
+
+		self.value = &null
+		self.complete = false
+
+		def *Thread thr -> Thread::new()
+
+		thr.execute({ *Thread thr ->
+			payload(self)
+		})
+
+		return self
+	}
+}
