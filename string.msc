@@ -4,6 +4,10 @@ extern fn asprintf(**i8 d, *i8 f, *i8 l, *i8 r) -> null
 extern fn strlen(*i8 s) -> i32
 
 fn asfmt(*i8 fmt, **any args) auto_free export -> *i8 {
+	return mansfmt(fmt, args)
+}
+
+fn mansfmt(*i8 fmt, **any args) export -> *i8 {
 	def i32 cap -> strlen(fmt)
     def *i8 buf -> manmalloc(cap)
 
