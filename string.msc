@@ -1,28 +1,14 @@
 include core::alloc
 
-extern fn strcmp(*i8 left, *i8 right) -> bool
 extern fn asprintf(**i8 d, *i8 f, *i8 l, *i8 r) -> null
+extern fn strlen(*i8 s) -> i32
 
-fn PcPceqcmp(*i8 leftp, *i8 rightp) -> bool {
-    return strcmp(leftp, rightp) == false
-}
+fn asfmt(*i8 fmt, **any args) auto_free export -> *i8 {
+	def i32 cap -> strlen(fmt)
+    def *i8 buf -> manmalloc(cap)
 
-fn E0_cE0_ceqcmp(*i8 left, *i8 right) -> bool {
-    return strcmp(left, right) == false
-}
+    # TODO: implement formatting logic
+    buf = fmt
 
-fn FcFceqcmp(i32 leftc, *i8 s, i32 rightc, *i8 other) -> i8 {
-	if leftc != rightc {
-		return false
-	}
-
-	return strcmp(s, other) == false
-}
-
-fn astrcat(*i8 l, *i8 r) auto_free -> *i8 {
-    def *i8 buf -> ""
-
-    asprintf(&buf, "%s", l, r)
-
-    return bufy
+    return buf
 }
