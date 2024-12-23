@@ -2,17 +2,40 @@ include core::alloc
 
 extern fn asprintf(**i8 d, *i8 f, *i8 l, *i8 r) -> null
 extern fn strlen(*i8 s) -> i32
+extern fn memcpy(*any d, *any s, i32 l) -> any*
 
-fn asfmt(*i8 fmt, **any args) auto_free export -> *i8 {
+fn asfmt(*:0[i8] fmt, **any args) auto_free export -> *i8 {
 	return mansfmt(fmt, args)
 }
 
-fn mansfmt(*i8 fmt, **any args) export -> *i8 {
-	def i32 cap -> strlen(fmt)
+# takes a formatted string (e.g. "foo %s")
+fn mansfmt(*:0[i8] fmt, **any args) export -> *i8 {
+	def i32 cap -> strlen(fmt) + 1
     def *i8 buf -> manmalloc(cap)
 
-    # TODO: implement formatting logic
-    buf = fmt
+    def i32 fmt_i -> 0
+
+    for i, char in fmt {
+
+    	# reallocate pointer (check 1)
+    	if i == cap {
+    		cap = cap * 2
+
+    		def *i8 new -> manmalloc(cap)
+
+        	memcpy(new, strlen(buf) + 1)
+
+         	manfree(buf)
+
+         	buf = new
+    	}
+
+		if char == '%' {
+
+		} else {
+
+		}
+    }
 
     return buf
 }
