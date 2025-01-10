@@ -1,0 +1,59 @@
+include core::alloc
+
+extern fn open(*i8 p, i32 m) -> i32
+extern fn close(i32 fd) -> null
+extern fn read(i32 fd, *i8 buf, i32 len) -> i32
+extern fn lseek(i32 fd, i32 from, i32 to) -> i32
+
+fn readonly() export -> i32 {
+	return 0
+}
+
+fn writeonly() export -> i32 {
+	return 1
+}
+
+fn readwrite() export -> i32 {
+	return 2
+}
+
+fn seek_end() export -> i32 {
+	return 2
+}
+
+fn file_len(*i8 path) export -> i32 {
+	let fd: i32 = open(path, readonly())
+
+	return lseek(fd, 0, seek_end())
+}
+
+# TODO: Implement errors as values in mosaic
+fn read_to(*i8 path, *i8 buf, i32 len) export -> bool {
+	let fd: i32 = open(path, readonly())
+
+    if fd == 4294967295 {
+        return false
+    }
+
+    let bytes_read: i32 = read(fd, buf, len)
+
+	if bytes_read == 4294967295 {
+		close(fd)
+
+		return false
+	}
+
+    close(fd)
+
+    return true
+}
+
+fn read_all(*i8 file_path) export must_free -> *i8 {
+	let len: i32 = file_len(file_path)
+
+	let buf: *i8 = manmalloc(len) as *i8
+
+	read_to(file_path, buf, len)
+
+	return buf
+}

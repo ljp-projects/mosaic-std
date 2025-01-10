@@ -1,0 +1,19 @@
+type socket_addr_in = *any
+
+# instead of struct Foo { def foo: i32 = init }
+type Foo = *i32
+
+# instead of
+# struct Bar {
+#	 def foo: i32 = init
+#	 def bar: *i8 = init
+# }
+type Bar = *any
+
+fn Bar::foo(self: Self) getter -> i32 {
+	# read the first 4 bytes
+	return (self as *i32)[0]
+}
+
+fn create_server(i32 port, ) -> i32 {
+}

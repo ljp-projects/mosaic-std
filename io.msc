@@ -1,28 +1,72 @@
-extern fn puts(*i8 s) -> null
-extern fn printf(*i8 fmt, i32 s) -> null
-extern fn getline(**i8 l, *i32 n, *null f) -> i32
-extern fn get_stdin() -> *null
-extern fn nullptr() -> *null
+include core::alloc
 
-fn println(*i8 str) export -> null {
-	return puts(str)
+extern fn strlen(*i8 s) -> i32
+extern fn write(i32 fd, *i8 s, i32 len) -> i64
+extern fn read(i32 fd, *i8 dst, i32 len) -> i32
+
+fn stdin_fd() export -> i32 {
+	return 0
 }
 
-fn readln() auto_free export -> *i8 {
-	def *null stdin -> get_stdin()
+fn stdout_fd() export -> i32 {
+	return 1
+}
 
-	def *i8 line -> nullptr()
-	def i32 len  -> 0
+fn stderr_fd() export -> i32 {
+	return 2
+}
 
-	printf("LEN %d", 1)
+fn print(*i8 str) export -> null {
+	write(stdout_fd(), str, strlen(str))
 
-	def i32 chars -> getline(&line, &len, stdin)
+	return null
+}
 
-	# if line[chars - 1] == "\n"[0] {
-    #     line[chars - 1] = "\0"[0]
-    # }
+fn println(*i8 str) export -> null {
+	print(str)
+	return print("\n\0")
+}
 
-    printf("LEN %d", len)
+fn eprint(*i8 str) export -> null {
+	write(stderr_fd(), str, strlen(str))
+
+	return null
+}
+
+fn eprintln(*i8 str) export -> null {
+	eprint(str)
+	return eprint("\n\0")
+}
+
+fn readln() export must_free -> *:0[i8] {
+	let fd: i32 = stdin_fd()
+
+	mut line: *:0[i8] = "" as *:0[i8]
+    mut len: i64 = 1
+    let one: i64 = line
+
+    mut bytes_read: i32 = read(fd, line + len - one, 1)
+
+    if bytes_read == 4294967295 {
+    	return "\n\0" as *:0[i8]
+    }
+
+	if line[0] == ("\n"[0]) {
+		return "\n\0" as *:0[i8]
+	}
+
+    while (bytes_read != 4294967295) && (bytes_read != ("\n"[0]) as i32) {
+        let tmp: *0[i8] = memrealloc(line, (len + one) as i32) as *:0[i8]
+
+        line = tmp
+        line[len + one] = ("\0"[0])
+
+        if line[len] != ("\n"[0]) {
+        	len = len + one
+
+        	bytes_read = read(fd, line + len, 1)
+        }
+    }
 
     return line
 }
