@@ -2,7 +2,6 @@ include core::alloc
 
 extern fn strlen(*i8 s) -> i32
 extern fn write(i32 fd, *i8 s, i32 len) -> i64
-extern fn read(i32 fd, *i8 dst, i32 len) -> i32
 
 fn stdin_fd() export -> i32 {
 	return 0
@@ -24,7 +23,7 @@ fn print(*i8 str) export -> null {
 
 fn println(*i8 str) export -> null {
 	print(str)
-	return print("\n\0")
+	return print("\n\0" as *i8)
 }
 
 fn eprint(*i8 str) export -> null {
@@ -35,38 +34,5 @@ fn eprint(*i8 str) export -> null {
 
 fn eprintln(*i8 str) export -> null {
 	eprint(str)
-	return eprint("\n\0")
-}
-
-fn readln() export must_free -> *:0[i8] {
-	let fd: i32 = stdin_fd()
-
-	mut line: *:0[i8] = "" as *:0[i8]
-    mut len: i64 = 1
-    let one: i64 = line
-
-    mut bytes_read: i32 = read(fd, line + len - one, 1)
-
-    if bytes_read == 4294967295 {
-    	return "\n\0" as *:0[i8]
-    }
-
-	if line[0] == ("\n"[0]) {
-		return "\n\0" as *:0[i8]
-	}
-
-    while (bytes_read != 4294967295) && (bytes_read != ("\n"[0]) as i32) {
-        let tmp: *0[i8] = memrealloc(line, (len + one) as i32) as *:0[i8]
-
-        line = tmp
-        line[len + one] = ("\0"[0])
-
-        if line[len] != ("\n"[0]) {
-        	len = len + one
-
-        	bytes_read = read(fd, line + len, 1)
-        }
-    }
-
-    return line
+	return eprint("\n\0" as *i8)
 }
